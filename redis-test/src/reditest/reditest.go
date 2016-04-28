@@ -32,9 +32,11 @@ func main() {
 
 	insertNewCust(cluster)
 
-	fmt.Println("Inserting %v user's info take %v...", time.Since(start))
+	fmt.Println("Inserting %s user's info take %s...", time.Since(start))
 
+    start = time.Now()
 	getServicemgmtNo(cluster)
+    fmt.Println("Retrieving %s user's info take %s...", time.Since(start))
 
 }
 
@@ -58,30 +60,22 @@ func insertNewCust(cluster *redis.Cluster) {
 }
 
 func getServicemgmtNo(cluster *redis.Cluster) {
-	key := cePrefix + "010" + strconv.Itoa(10000000)
-	reply, err := redis.StringMap(cluster.Do("HGETALL", key))
+    baseMgmtNo := 1000000000
+	baseExtrnid := 10000000
 
-	if err != nil {
-		log.Fatalf("redis.StringMap error: %s", err.Error())
+    for i := 0; i < maxUserCount; i++ {
+		extrnid := "010" + strconv.Itoa(baseExtrnid)
+		key := cePrefix + extrnid
+
+		reply, err := redis.StringMap(cluster.Do("HGETALL", key))
+
+		if err != nil {
+			log.Fatalf("cluster.Do error: %s", err.Error())
+		}
+
+        fmt.Println("custextrnid for %s is %s", key, reply)
+
+		baseMgmtNo++
+		baseExtrnid++
 	}
-
-	fmt.Println("custextrnid for %v is %v", key, reply)
-
-	key = cePrefix + "010" + strconv.Itoa(10000001)
-	reply, err = redis.StringMap(cluster.Do("HGETALL", key))
-
-	if err != nil {
-		log.Fatalf("redis.StringMap error: %s", err.Error())
-	}
-
-	fmt.Println("custextrnid for %v is %v", key, reply)
-
-	key = cePrefix + "010" + strconv.Itoa(10010000)
-	reply, err = redis.StringMap(cluster.Do("HGETALL", key))
-
-	if err != nil {
-		log.Fatalf("redis.StringMap error: %s", err.Error())
-	}
-
-	fmt.Println("custextrnid for %v is %v", key, reply)
 }

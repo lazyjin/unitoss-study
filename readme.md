@@ -10,3 +10,16 @@
 ### REFERENCES
  * [redis.io](http://redis.io/)
  * [redis-go-cluster](https://github.com/chasex/redis-go-cluster)
+ * [cassandra official home](http://cassandra.apache.org/)
+ * [cassandra data structure 설명 블로그](http://meetup.toast.com/posts/58)
+ * [cassandra CQL go driver](https://github.com/gocql/gocql)
+
+
+### CQL instructions
+ sql 유사한 부분이 많으며, sql 에 익숙하면 쉽게 적응 가능.
+```
+DESCRIBE KEYSPACES; -- show list of all keyspaces
+USE keyspace-name;
+DESCRIBE TABLES; -- show list of all tables in current keyspace-name
+SELECT * FROM table-name; -- sql 의 select 문과 동일.
+```

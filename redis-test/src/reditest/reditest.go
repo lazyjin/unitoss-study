@@ -32,11 +32,11 @@ func main() {
 
 	insertNewCust(cluster)
 
-	fmt.Println("Inserting %s user's info take %s...", time.Since(start))
+	fmt.Println("Inserting %s user's info take %s...", maxUserCount, time.Since(start))
 
-    start = time.Now()
+	start = time.Now()
 	getServicemgmtNo(cluster)
-    fmt.Println("Retrieving %s user's info take %s...", time.Since(start))
+	fmt.Println("Retrieving %s user's info take %s...", maxUserCount, time.Since(start))
 
 }
 
@@ -60,10 +60,10 @@ func insertNewCust(cluster *redis.Cluster) {
 }
 
 func getServicemgmtNo(cluster *redis.Cluster) {
-    baseMgmtNo := 1000000000
+	baseMgmtNo := 1000000000
 	baseExtrnid := 10000000
 
-    for i := 0; i < maxUserCount; i++ {
+	for i := 0; i < maxUserCount; i++ {
 		extrnid := "010" + strconv.Itoa(baseExtrnid)
 		key := cePrefix + extrnid
 
@@ -73,7 +73,7 @@ func getServicemgmtNo(cluster *redis.Cluster) {
 			log.Fatalf("cluster.Do error: %s", err.Error())
 		}
 
-        fmt.Println("custextrnid for %s is %s", key, reply)
+		fmt.Println("custextrnid for %s is %s", key, reply)
 
 		baseMgmtNo++
 		baseExtrnid++

@@ -23,6 +23,7 @@ func main() {
 	cluster := gocql.NewCluster("52.79.148.85")
 	cluster.Keyspace = "unitoss"
 	cluster.Consistency = gocql.Quorum
+	cluster.ProtoVersion = 3
 	session, _ := cluster.CreateSession()
 	defer session.Close()
 

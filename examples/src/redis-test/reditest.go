@@ -25,18 +25,20 @@ func main() {
 		})
 
 	if err != nil {
-		log.Fatalf("redis.New error: %s", err.Error())
+		log.Fatalf("redis.New error: %s \n", err.Error())
 	}
 
 	start := time.Now()
 
 	insertNewCust(cluster)
 
-	fmt.Println("Inserting %s user's info take %s...", maxUserCount, time.Since(start))
+	fmt.Printf("--Inserting %v user's info take %s...\n", maxUserCount, time.Since(start))
+	fmt.Println("Press ANY key to continue...")
+	fmt.Scanln()
 
 	start = time.Now()
 	getServicemgmtNo(cluster)
-	fmt.Println("Retrieving %s user's info take %s...", maxUserCount, time.Since(start))
+	fmt.Printf("**Retrieving %v user's info take %s...\n", maxUserCount, time.Since(start))
 
 }
 
@@ -51,7 +53,7 @@ func insertNewCust(cluster *redis.Cluster) {
 		_, err := cluster.Do("HMSET", key, "serviceMgmtNo", baseMgmtNo, "extrnid", extrnid)
 
 		if err != nil {
-			log.Fatalf("cluster.Do error: %s", err.Error())
+			log.Fatalf("cluster.Do error: %s\n", err.Error())
 		}
 
 		baseMgmtNo++
@@ -70,10 +72,10 @@ func getServicemgmtNo(cluster *redis.Cluster) {
 		reply, err := redis.StringMap(cluster.Do("HGETALL", key))
 
 		if err != nil {
-			log.Fatalf("cluster.Do error: %s", err.Error())
+			log.Fatalf("cluster.Do error: %s\n", err.Error())
 		}
 
-		fmt.Println("custextrnid for %s is %s", key, reply)
+		fmt.Printf("custextrnid for %s is %s\n", key, reply)
 
 		baseMgmtNo++
 		baseExtrnid++

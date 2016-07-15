@@ -14,6 +14,11 @@
  * [cassandra data structure 설명 블로그](http://meetup.toast.com/posts/58)
  * [cassandra CQL go driver](https://github.com/gocql/gocql)
 
+ * [elastic home page](https://www.elastic.co/)
+ * [Logstash Reference (Getting Started)](https://www.elastic.co/guide/en/logstash/current/index.html)
+ * [Elasticsearch Reference (Getting Started)](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
+ * [Kibana Reference (Getting Started)](https://www.elastic.co/guide/en/kibana/current/index.html)
+ * [ELK 실제 적용 예제](http://brantiffy.axisj.com/archives/418)
 
 ### CQL instructions
  sql 유사한 부분이 많으며, sql 에 익숙하면 쉽게 적응 가능.

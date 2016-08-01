@@ -1,0 +1,1 @@
+/usr/bin/c++    -std=c++0x   CMakeFiles/testing_disconnect_cluster.dir/src/testing/clusterdisconnect.cpp.o  -o bin/testing_disconnect_cluster -rdynamic 

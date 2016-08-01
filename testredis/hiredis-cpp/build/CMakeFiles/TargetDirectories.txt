@@ -1,0 +1,9 @@
+/home/unitoss/unitoss-study/testredis/hiredis-cpp/build/CMakeFiles/edit_cache.dir
+/home/unitoss/unitoss-study/testredis/hiredis-cpp/build/CMakeFiles/rebuild_cache.dir
+/home/unitoss/unitoss-study/testredis/hiredis-cpp/build/CMakeFiles/testing_disconnect_cluster.dir
+/home/unitoss/unitoss-study/testredis/hiredis-cpp/build/CMakeFiles/asyncerr.dir
+/home/unitoss/unitoss-study/testredis/hiredis-cpp/build/CMakeFiles/unix.dir
+/home/unitoss/unitoss-study/testredis/hiredis-cpp/build/CMakeFiles/testing.dir
+/home/unitoss/unitoss-study/testredis/hiredis-cpp/build/CMakeFiles/threadedpool.dir
+/home/unitoss/unitoss-study/testredis/hiredis-cpp/build/CMakeFiles/sync.dir
+/home/unitoss/unitoss-study/testredis/hiredis-cpp/build/CMakeFiles/async.dir

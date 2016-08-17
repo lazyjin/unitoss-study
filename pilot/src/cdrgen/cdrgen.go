@@ -3,6 +3,7 @@ package cdrgen
 import (
 	"fmt"
 	"github.com/op/go-logging"
+	"os"
 )
 
 var log = logging.MustGetLogger("example")
@@ -12,8 +13,9 @@ var format = logging.MustStringFormatter(
 )
 
 func main() {
+	fmt.Println("START CDR GENERATOR...")
 	backend1 := logging.NewLogBackend(os.Stderr, "", 0)
-
+	backend2 := logging.NewLogBackend(os.Stderr, "", 0)
 	// For messages written to backend2 we want to add some additional
 	// information to the output, including the used log level and the name of
 	// the function.
@@ -26,7 +28,7 @@ func main() {
 	// Set the backends to be used.
 	logging.SetBackend(backend1Leveled, backend2Formatter)
 
-	log.Debugf("debug %s", Password("secret"))
+	log.Debugf("debug %s", "DEBUG MESSAGE")
 	log.Info("info")
 	log.Notice("notice")
 	log.Warning("warning")

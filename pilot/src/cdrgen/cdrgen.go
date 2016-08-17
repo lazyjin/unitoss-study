@@ -1,32 +1,16 @@
-package cdrgen
+package main
 
 import (
+	"common/clog"
 	"fmt"
-	"github.com/op/go-logging"
-	"os"
 )
 
-var log = logging.MustGetLogger("example")
-
-var format = logging.MustStringFormatter(
-	`%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}`,
-)
+var log = clog.GetLogger()
 
 func main() {
 	fmt.Println("START CDR GENERATOR...")
-	backend1 := logging.NewLogBackend(os.Stderr, "", 0)
-	backend2 := logging.NewLogBackend(os.Stderr, "", 0)
-	// For messages written to backend2 we want to add some additional
-	// information to the output, including the used log level and the name of
-	// the function.
-	backend2Formatter := logging.NewBackendFormatter(backend2, format)
 
-	// Only errors and more severe messages should be sent to backend1
-	backend1Leveled := logging.AddModuleLevel(backend1)
-	backend1Leveled.SetLevel(logging.ERROR, "")
-
-	// Set the backends to be used.
-	logging.SetBackend(backend1Leveled, backend2Formatter)
+	initialize()
 
 	log.Debugf("debug %s", "DEBUG MESSAGE")
 	log.Info("info")
@@ -34,4 +18,8 @@ func main() {
 	log.Warning("warning")
 	log.Error("err")
 	log.Critical("crit")
+}
+
+func initialize() {
+	clog.InitWith("cdrgen", "app_cdrgen.log", ".", clog.DEBUG)
 }

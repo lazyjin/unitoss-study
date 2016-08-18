@@ -1,3 +1,0 @@
-logdir: ../logs
-loglevel: DEBUG
-logname: app_cdrgen.log

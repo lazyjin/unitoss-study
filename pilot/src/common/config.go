@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -12,6 +11,8 @@ type Config struct {
 	Loglevel string
 	Logname  string
 }
+
+const TIME_FMT = "%d%02d%02d%02d%02d%02d%1d"
 
 var conf Config
 
@@ -30,11 +31,4 @@ func ReadConfigFile(pname string) {
 
 func GetConfig() *Config {
 	return &conf
-}
-
-func CheckErrPanic(e error) {
-	if e != nil {
-		fmt.Printf("%v\n", e)
-		panic(e)
-	}
 }

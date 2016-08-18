@@ -1,14 +1,18 @@
 package main
 
 import (
+	"common"
 	"common/clog"
 	"fmt"
 )
+
+const PNAME = "cdrgen"
 
 var log = clog.GetLogger()
 
 func main() {
 	fmt.Println("START CDR GENERATOR...")
+	log.Info("START CDR GENERATOR...")
 
 	initialize()
 
@@ -21,5 +25,12 @@ func main() {
 }
 
 func initialize() {
-	clog.InitWith("cdrgen", "app_cdrgen.log", ".", clog.DEBUG)
+	common.ReadConfigFile(PNAME)
+	conf := common.GetConfig()
+	clog.InitWith(PNAME, conf.Logname, conf.Logdir, conf.Loglevel)
+
 }
+
+// func makeRandomUdr {
+
+// }

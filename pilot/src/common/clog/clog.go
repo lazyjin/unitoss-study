@@ -1,6 +1,7 @@
 package clog
 
 import (
+	"common"
 	"fmt"
 	"github.com/op/go-logging"
 	"os"
@@ -34,7 +35,7 @@ func Init() {
 	logging.SetBackend(backendFormatter)
 }
 
-func InitWith(logname string, filename string, path string, level logging.Level) {
+func InitWith(logname string, filename string, path string, level string) {
 	logging.MustGetLogger(logname)
 	logFilename = filename
 	logPath = path
@@ -50,7 +51,11 @@ func InitWith(logname string, filename string, path string, level logging.Level)
 	backend := logging.NewLogBackend(f, "", 0)
 	backendFormatter := logging.NewBackendFormatter(backend, format)
 	backendLeveled := logging.AddModuleLevel(backendFormatter)
-	backendLeveled.SetLevel(level, "")
+
+	lev, err := logging.LogLevel(level)
+	common.CheckErrPanic(err)
+
+	backendLeveled.SetLevel(lev, "")
 
 	// Set the backends to be used.
 	logging.SetBackend(backendFormatter)

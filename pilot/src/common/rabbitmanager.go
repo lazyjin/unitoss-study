@@ -18,7 +18,7 @@ type Rabbit struct {
 
 type RabbitMgr interface {
 	ConnectRabbit(host string, port int, id string, pw string)
-	TaskQueueDeclare()
+	TaskQueueDeclare(qn string)
 	PublishToQueue(msg string) error
 }
 

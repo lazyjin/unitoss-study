@@ -25,8 +25,17 @@ func main() {
 
 	fmt.Printf("random UDR %v\n", randUdr)
 
-	jsonUdr := randUdr.ConvToJsonStr()
+	jsonUdr, err := randUdr.ConvToJsonStr()
+	if err != nil {
+		log.Errorf("Udr to Json failed: UDR: [%v] JSON: [%v]", randUdr, err)
+	}
+
 	fmt.Printf("random JSON UDR %v\n", jsonUdr)
+
+	err = rabbitMgr.PublishToQueue(jsonUdr)
+	if err != nil {
+		log.Errorf("UDR message is not send: %v", err)
+	}
 
 	// log.Debugf("debug %s", "DEBUG MESSAGE")
 	// log.Info("info")
@@ -39,12 +48,16 @@ func main() {
 func initialize() {
 	common.ReadConfigFile(PNAME)
 	conf := common.GetConfig()
-	log.Infof("Config: %v", conf)
+	log.Debugf("Config: %v", conf)
 	// init log
 	clog.InitWith(PNAME, conf.Logname, conf.Logdir, conf.Loglevel)
 
 	// rabbit publisher connect
-	rabbitMgr.ConnectRabbit(conf.Rabbithost, conf.Rabbitport, conf.Rabbituser, conf.Rabbitpw)
+	rabbitMgr.ConnectRabbit(
+		conf.Rabbithost,
+		conf.Rabbitport,
+		conf.Rabbituser,
+		conf.Rabbitpw)
 }
 
 func makeRandomUdr() udr.UdrRaw {
@@ -58,11 +71,31 @@ func makeRandomUdr() udr.UdrRaw {
 
 	// make time fields
 	now := time.Now()
-	start := fmt.Sprintf(common.TIME_FMT, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), now.Nanosecond()/1000000000)
+	start := fmt.Sprintf(
+		common.TIME_FMT,
+		now.Year(),
+		now.Month(),
+		now.Day(),
+		now.Hour(),
+		now.Minute(),
+		now.Second(),
+		now.Nanosecond()/1000000000)
+
 	d, err := time.ParseDuration("5s")
-	common.CheckErrPanic(err)
+	if err != nil {
+		log.Panic(err)
+	}
+
 	then := now.Add(d)
-	end := fmt.Sprintf(common.TIME_FMT, then.Year(), then.Month(), then.Day(), then.Hour(), then.Minute(), then.Second(), then.Nanosecond()/1000000000)
+	end := fmt.Sprintf(
+		common.TIME_FMT,
+		then.Year(),
+		then.Month(),
+		then.Day(),
+		then.Hour(),
+		then.Minute(),
+		then.Second(),
+		then.Nanosecond()/1000000000)
 
 	tmpUdr.SetUdrRaw(randEui, start, end, randByte, "")
 

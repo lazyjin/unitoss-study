@@ -8,8 +8,7 @@ var log = clog.GetLogger()
 
 func CheckErrPanic(e error) {
 	if e != nil {
-		log.Criticalf("Panic! %v", e)
-		panic(e)
+		log.Panic(e)
 	}
 }
 

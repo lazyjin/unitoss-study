@@ -18,6 +18,7 @@ type Rabbit struct {
 
 type RabbitMgr interface {
 	ConnectRabbit(host string, port int, id string, pw string)
+	PublishToQueue(msg string) error
 }
 
 var _ RabbitMgr = &Rabbit{}
@@ -38,10 +39,14 @@ func (r *Rabbit) ConnectRabbit(host string, port int, id string, pw string) {
 	var err error
 
 	r.conn, err = amqp.Dial("amqp://" + id + ":" + pw + "@" + r.Host + ":" + strconv.Itoa(r.Port) + "/")
-	CheckErrPanic(err)
+	if err != nil {
+		log.Panic(err)
+	}
 
 	r.ch, err = r.conn.Channel()
-	CheckErrPanic(err)
+	if err != nil {
+		log.Panic(err)
+	}
 
 	log.Info("Successfully connect to RabbitMQ...")
 }
@@ -67,9 +72,25 @@ func (r *Rabbit) TaskQueueDeclare() {
 		false,        // no-wait
 		nil,          // arguments
 	)
-	CheckErrPanic(err)
+	if err != nil {
+		log.Panic(err)
+	}
 }
 
-func PublishToQueue() {
+func (r *Rabbit) PublishToQueue(msg string) error {
+	err := r.ch.Publish(
+		"",           // exchange
+		r.queue.Name, // routing key
+		false,        // mandatory
+		false,
+		amqp.Publishing{
+			DeliveryMode: amqp.Persistent,
+			ContentType:  "text/plain",
+			Body:         []byte(msg),
+		})
+	if err != nil {
+		return err
+	}
 
+	return nil
 }

@@ -17,13 +17,14 @@ const (
 )
 
 var (
-	log         logging.Logger
+	log logging.Logger
+
 	logFilename string
 	logPath     string
 )
 
 var format = logging.MustStringFormatter(
-	`%{time:2006-01-02 15:00:01.000} %{shortfile} %{shortfunc} [%{level:.4s}] %{message}`,
+	`%{time:2006-01-02 15:04:05.999} %{shortfunc} %{shortfile} [%{level:.4s}] %{message}`,
 )
 
 func Init() {
@@ -56,10 +57,10 @@ func InitWith(logname string, filename string, path string, level string) {
 		panic(err)
 	}
 
-	backendLeveled.SetLevel(lev, "")
+	backendLeveled.SetLevel(lev, logname)
 
 	// Set the backends to be used.
-	logging.SetBackend(backendFormatter)
+	logging.SetBackend(backendLeveled)
 }
 
 func GetLogger() *logging.Logger {

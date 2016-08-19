@@ -1,7 +1,6 @@
 package udr
 
 import (
-	"common"
 	"encoding/json"
 )
 
@@ -47,9 +46,11 @@ func (ur *UdrRaw) SetUdrRaw(eui uint32, start string, end string, byteCnt uint32
 	ur.Gateway = gateway
 }
 
-func (ur *UdrRaw) ConvToJsonStr() string {
+func (ur *UdrRaw) ConvToJsonStr() (string, error) {
 	jsonUdr, err := json.Marshal(ur)
-	common.CheckErrPanic(err)
+	if err != nil {
+		return "", err
+	}
 
-	return string(jsonUdr)
+	return string(jsonUdr), nil
 }

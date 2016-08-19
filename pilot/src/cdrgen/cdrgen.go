@@ -58,7 +58,7 @@ func initialize() {
 		conf.Rabbitport,
 		conf.Rabbituser,
 		conf.Rabbitpw)
-	rabbitMgr.TaskQueueDeclare("task_queue")
+	rabbitMgr.UdrSendQueueDeclare(conf.Udrqueue)
 }
 
 func makeRandomUdr() udr.UdrRaw {

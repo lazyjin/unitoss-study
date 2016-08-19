@@ -17,6 +17,10 @@ type Config struct {
 	Rabbitport int
 	Rabbituser string
 	Rabbitpw   string
+
+	// queue information
+	Udrqueue    string
+	Reqreciever string
 }
 
 const TIME_FMT = "%d%02d%02d%02d%02d%02d%1d"

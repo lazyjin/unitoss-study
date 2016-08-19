@@ -11,14 +11,15 @@ type Rabbit struct {
 	user string
 	pw   string
 
-	conn  *amqp.Connection
-	ch    *amqp.Channel
-	queue amqp.Queue
+	conn *amqp.Connection
+	ch   *amqp.Channel
+	sque amqp.Queue
+	rque amqp.Queue
 }
 
 type RabbitMgr interface {
 	ConnectRabbit(host string, port int, id string, pw string)
-	TaskQueueDeclare(qn string)
+	UdrSendQueueDeclare(qn string)
 	PublishToQueue(msg string) error
 }
 
@@ -61,10 +62,26 @@ func (r *Rabbit) CloseChanRabbit() {
 	log.Info("Successfully close RabbitMQ channel...")
 }
 
-func (r *Rabbit) TaskQueueDeclare(qn string) {
+func (r *Rabbit) UdrSendQueueDeclare(qn string) {
 	var err error
 
-	r.queue, err = r.ch.QueueDeclare(
+	r.sque, err = r.ch.QueueDeclare(
+		qn,    // name
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+func (r *Rabbit) ReqUdrQueueDeclare(qn string) {
+	var err error
+
+	r.rque, err = r.ch.QueueDeclare(
 		qn,    // name
 		true,  // durable
 		false, // delete when unused
@@ -79,9 +96,9 @@ func (r *Rabbit) TaskQueueDeclare(qn string) {
 
 func (r *Rabbit) PublishToQueue(msg string) error {
 	err := r.ch.Publish(
-		"",           // exchange
-		r.queue.Name, // routing key
-		false,        // mandatory
+		"",          // exchange
+		r.sque.Name, // routing key
+		false,       // mandatory
 		false,
 		amqp.Publishing{
 			DeliveryMode: amqp.Persistent,

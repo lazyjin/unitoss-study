@@ -11,7 +11,10 @@ import (
 
 const PNAME = "cdrgen"
 
-var log = clog.GetLogger()
+var (
+	log       = clog.GetLogger()
+	rabbitMgr = common.NewRabbitManager()
+)
 
 func main() {
 	log.Info("START CDR GENERATOR...")
@@ -36,7 +39,12 @@ func main() {
 func initialize() {
 	common.ReadConfigFile(PNAME)
 	conf := common.GetConfig()
+	log.Infof("Config: %v", conf)
+	// init log
 	clog.InitWith(PNAME, conf.Logname, conf.Logdir, conf.Loglevel)
+
+	// rabbit publisher connect
+	rabbitMgr.ConnectRabbit(conf.Rabbithost, conf.Rabbitport)
 }
 
 func makeRandomUdr() udr.UdrRaw {

@@ -25,9 +25,9 @@ func ReadConfigFile(pname string) {
 	cfgpath := os.Getenv("CFG_DIR")
 	// cfgfile := os.Args[0]
 
-	// data, err := ioutil.ReadFile(cfgpath + "/" + pname + ".yaml")
+	data, err := ioutil.ReadFile(cfgpath + "/" + pname + ".yaml")
 	// test code for windows
-	data, err := ioutil.ReadFile(cfgpath + "\\cdrgen.yaml")
+	// data, err := ioutil.ReadFile(cfgpath + "\\cdrgen.yaml")
 	CheckErrPanic(err)
 
 	err = yaml.Unmarshal(data, &conf)

@@ -18,6 +18,7 @@ type Rabbit struct {
 
 type RabbitMgr interface {
 	ConnectRabbit(host string, port int, id string, pw string)
+	TaskQueueDeclare()
 	PublishToQueue(msg string) error
 }
 
@@ -30,7 +31,6 @@ func NewRabbitManager() RabbitMgr {
 }
 
 func (r *Rabbit) ConnectRabbit(host string, port int, id string, pw string) {
-	log.Infof("host: %v || port: %v", host, port)
 	r.Host = host
 	r.Port = port
 	r.user = id
@@ -61,16 +61,16 @@ func (r *Rabbit) CloseChanRabbit() {
 	log.Info("Successfully close RabbitMQ channel...")
 }
 
-func (r *Rabbit) TaskQueueDeclare() {
+func (r *Rabbit) TaskQueueDeclare(qn string) {
 	var err error
 
 	r.queue, err = r.ch.QueueDeclare(
-		"task_queue", // name
-		true,         // durable
-		false,        // delete when unused
-		false,        // exclusive
-		false,        // no-wait
-		nil,          // arguments
+		qn,    // name
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
 	)
 	if err != nil {
 		log.Panic(err)

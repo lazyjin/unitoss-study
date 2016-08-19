@@ -6,15 +6,18 @@ import (
 )
 
 type Rabbit struct {
-	Host  string
-	Port  int
+	Host string
+	Port int
+	user string
+	pw   string
+
 	conn  *amqp.Connection
 	ch    *amqp.Channel
 	queue amqp.Queue
 }
 
 type RabbitMgr interface {
-	ConnectRabbit(host string, port int)
+	ConnectRabbit(host string, port int, id string, pw string)
 }
 
 var _ RabbitMgr = &Rabbit{}
@@ -25,14 +28,16 @@ func NewRabbitManager() RabbitMgr {
 	return rmgr
 }
 
-func (r *Rabbit) ConnectRabbit(host string, port int) {
+func (r *Rabbit) ConnectRabbit(host string, port int, id string, pw string) {
 	log.Infof("host: %v || port: %v", host, port)
 	r.Host = host
 	r.Port = port
+	r.user = id
+	r.pw = pw
 
 	var err error
 
-	r.conn, err = amqp.Dial("amqp://guest:guest@" + r.Host + ":" + strconv.Itoa(r.Port) + "/")
+	r.conn, err = amqp.Dial("amqp://" + id + ":" + pw + "@" + r.Host + ":" + strconv.Itoa(r.Port) + "/")
 	CheckErrPanic(err)
 
 	r.ch, err = r.conn.Channel()

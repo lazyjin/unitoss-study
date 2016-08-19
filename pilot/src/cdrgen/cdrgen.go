@@ -44,7 +44,7 @@ func initialize() {
 	clog.InitWith(PNAME, conf.Logname, conf.Logdir, conf.Loglevel)
 
 	// rabbit publisher connect
-	rabbitMgr.ConnectRabbit(conf.Rabbithost, conf.Rabbitport)
+	rabbitMgr.ConnectRabbit(conf.Rabbithost, conf.Rabbitport, conf.Rabbituser, conf.Rabbitpw)
 }
 
 func makeRandomUdr() udr.UdrRaw {

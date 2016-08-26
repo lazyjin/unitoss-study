@@ -1,0 +1,151 @@
+{{define "udrgen"}}
+{{template "header"}}
+
+<style type="text/css">
+.hidden.menu {
+    display: none;
+  }
+.masthead.segment {
+  min-height: 400px;
+  padding: 1em 0em;
+}
+.masthead h1.ui.header {
+  margin-top: 1em;
+  margin-bottom: 0.8em;
+  font-size: 4em;
+  font-weight: bold;
+}
+.masthead .ui.menu .ui.button {
+  margin-left: 0.5em;
+}
+.masthead h2 {
+  font-size: 1.3em;
+  font-weight: normal;
+}
+.ui.container > h2.dividing.header {
+  font-size: 2em;
+  font-weight: normal;
+  margin: 4em 0em 3em;
+}
+.ui.header.udrcont {
+  margin-left: 3em;
+  margin-right: 3em;
+}
+.ui.form {
+  margin-left: 5em;
+  margin-right: 5em;
+}
+
+</style>
+
+<body>
+  <div class="ui-container">
+    <div class="ui inverted vertical masthead center aligned segment">
+      <div class="ui container">
+        <div class="ui large secondary inverted pointing menu">
+          <a class="toc item">
+            <i class="sidebar icon"></i>
+          </a>
+          <a class="active item">Home</a>
+          <div class="right item">
+            <a class="ui inverted button">Log in</a>
+            <a class="ui inverted button">Sign Up</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="ui text container">
+        <h1 class="ui inverted header">
+          UDR Generator
+        </h1>
+        <h2>과금DBM Pilot Project를 위한,</h2>
+        <h2>종류별 UDR 을 생성할 수 있는 page 입니다.</h2>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="ui-container">
+    <div class="ui-container"></div>
+    <h2 class="ui center aligned dividing header udrcont">Let's Generate UDR</h2>
+    <form class="ui form">
+      <div class="three fields">
+        <div class="field">
+          <div class="ui sub header">UDR type - Normal or Error</div>
+          <select class="ui dropdown" id="select" name="errortype">
+            <option value="">Normal/Error</option>
+            <option value="0">Normal</option>
+            <option value="1">Time Error</option>
+            <option value="2">EUI Error</option>
+            <option value="3">Format Error</option>
+
+          </select>
+        </div>
+        <div class="field">
+          <div class="ui sub header">Number of udr</div>
+          <input type="text" id="count" name="count" placeholder="number of udr">
+        </div>
+        <div class="field">
+          <div class="ui sub header">ready?</div>
+          <div class="fluid ui red submit button" tabindex="0">GENERATE!</div>
+        </div>
+      </div>
+      <div class="ui error message">
+        <ul class="list">
+          <li>Please select a UDR type</li>
+          <li>Please enter an integer value within 1~1000</li>
+        </ul>
+      </div>
+    </form>
+  </div>
+</body>
+
+<script type="text/javascript">
+$(function() {
+  $('#select').dropdown();
+
+  $('.ui.form').form({
+    on: 'blur',
+      fields: {
+        errortype: {
+          identifier : 'errortype',
+          rules: [
+            {
+              type : 'empty',
+              prompt : 'Please select a UDR type'
+            }
+          ]
+        },
+        count: {
+          identifier : 'count',
+          rules: [
+            {
+              type : 'integer[1..1000]',
+              prompt : 'Please enter an integer value within 1~1000'
+            }
+          ]
+        }
+      }
+  })
+  // $('#submit').on('click', function() {
+  //   if(validate()) {
+  //     alert("gogogo1")
+  //     var ajaxdata = $("#udrsubmit").serializeArray();
+  //     alert("gogogo2")
+  //     $.makeAjaxApi('/web/account/accountinput', 'html', ajaxdata)
+  //       .send( function(success, data) {
+  //         if(success) {
+  //             if(data == '0') {
+  //                 alert('등록하였습니다.');
+  //                 history.back();
+  //                 return ;
+  //             }
+  //         }
+  //         alert('등록 중 에러가 발생하였습니다.');
+  //       });
+  //   }
+  // });
+});
+</script>
+</html>
+{{end}}

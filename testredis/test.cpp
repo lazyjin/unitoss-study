@@ -10,6 +10,12 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+Cluster<redisContext>::ptr_t cluster_p;
+
+#define BASE_MGMT_NO = 1000000000
+#define BASE_EXTRNID = 10000000
+const int MAX_USER_CNT = 100000
+
 void processClusterCommand() {
 	Cluster<redisContext>::ptr_t cluster_p;
 	cluster_p = HiredisCommand<>::createCluster("localhost", 7000);
@@ -23,7 +29,24 @@ void processClusterCommand() {
 	delete cluster_p;
 }
 
+int connectRedisCluster() {
+	cluster_p = HiredisCommand<>::createCluster("localhost", 7000);
+
+	if(cluster_p == NULL) {
+		cout << "Fail to create cluster connection..." << endl;
+		exit(-1);
+	}
+
+	return 0;
+}
+
+void getSvcMgmtNo() {
+
+}
+
 int main(int argc, const char *argv[]) {
+	connectRedisCluster();
+
 	try {
 		processClusterCommand();
 	} catch( const RedisCluster::ClusterException &e) {

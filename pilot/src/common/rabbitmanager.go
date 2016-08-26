@@ -5,6 +5,8 @@ import (
 	"strconv"
 )
 
+type QueMsg <-chan amqp.Delivery
+
 type Rabbit struct {
 	Host string
 	Port int
@@ -20,7 +22,11 @@ type Rabbit struct {
 type RabbitMgr interface {
 	ConnectRabbit(host string, port int, id string, pw string)
 	UdrSendQueueDeclare(qn string)
+	ReqRecvQueueDeclare(qn string)
 	PublishToQueue(msg string) error
+	ConsumeQueue() (QueMsg, error)
+	CloseChanRabbit()
+	CloseConnRabbit()
 }
 
 var _ RabbitMgr = &Rabbit{}
@@ -78,7 +84,7 @@ func (r *Rabbit) UdrSendQueueDeclare(qn string) {
 	}
 }
 
-func (r *Rabbit) ReqUdrQueueDeclare(qn string) {
+func (r *Rabbit) ReqRecvQueueDeclare(qn string) {
 	var err error
 
 	r.rque, err = r.ch.QueueDeclare(
@@ -110,4 +116,31 @@ func (r *Rabbit) PublishToQueue(msg string) error {
 	}
 
 	return nil
+}
+
+func (r *Rabbit) ConsumeQueue() (QueMsg, error) {
+	msgs, err := r.ch.Consume(
+		r.rque.Name, // queue
+		"",          // consumer
+		false,       // auto-ack
+		false,       // exclusive
+		false,       // no-local
+		false,       // no-wait
+		nil,         // args
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return msgs, nil
+}
+
+func ResponseAck(d amqp.Delivery, pCh chan bool) {
+	result := <-pCh
+
+	if result {
+		d.Ack(false)
+	} else {
+		d.Reject(true)
+	}
 }

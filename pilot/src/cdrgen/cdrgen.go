@@ -3,9 +3,9 @@ package main
 import (
 	"common"
 	"common/clog"
+	"flag"
 	"fmt"
-	"math/rand"
-	"time"
+	"reflect"
 	"udr"
 )
 
@@ -17,38 +17,30 @@ var (
 )
 
 func main() {
+	isDaemon := flag.Bool("d", false, "Daemon mode. subscribe request from web")
+	flag.Parse()
+
 	log.Info("START CDR GENERATOR...")
 
-	initialize()
+	defer rabbitMgr.CloseChanRabbit()
+	defer rabbitMgr.CloseConnRabbit()
 
-	randUdr := makeRandomUdr()
+	if *isDaemon {
+		log.Info("Running Daemon mode...")
+		setRecvQueue()
+		runDaemon()
 
-	fmt.Printf("random UDR %v\n", randUdr)
+	} else {
+		procCh := make(chan bool, 100)
+		processUdrGen(1, udr.MakeRandomUdr, procCh)
+		<-procCh
 
-	jsonUdr, err := randUdr.ConvToJsonStr()
-	if err != nil {
-		log.Errorf("Udr to Json failed: UDR: [%v] JSON: [%v]", randUdr, err)
 	}
-
-	fmt.Printf("random JSON UDR %v\n", jsonUdr)
-
-	err = rabbitMgr.PublishToQueue(jsonUdr)
-	if err != nil {
-		log.Errorf("UDR message is not send: %v", err)
-	}
-
-	// log.Debugf("debug %s", "DEBUG MESSAGE")
-	// log.Info("info")
-	// log.Notice("notice")
-	// log.Warning("warning")
-	// log.Error("err")
-	// log.Critical("crit")
 }
 
-func initialize() {
+func init() {
 	common.ReadConfigFile(PNAME)
 	conf := common.GetConfig()
-	log.Debugf("Config: %v", conf)
 	// init log
 	clog.InitWith(PNAME, conf.Logname, conf.Logdir, conf.Loglevel)
 
@@ -61,44 +53,88 @@ func initialize() {
 	rabbitMgr.UdrSendQueueDeclare(conf.Udrqueue)
 }
 
-func makeRandomUdr() udr.UdrRaw {
-	tmpUdr := udr.GetEmptyUdrRaw()
+func setRecvQueue() {
+	conf := common.GetConfig()
+	rabbitMgr.ReqRecvQueueDeclare(conf.Reqreciever)
+}
 
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+func runDaemon() {
+	fmt.Println("run daemon mode")
 
-	// make random EUI && byte count
-	randEui := r.Uint32()%udr.EUI_BASE + udr.EUI_BASE
-	randByte := r.Uint32() % 10 * 100
-
-	// make time fields
-	now := time.Now()
-	start := fmt.Sprintf(
-		common.TIME_FMT,
-		now.Year(),
-		now.Month(),
-		now.Day(),
-		now.Hour(),
-		now.Minute(),
-		now.Second(),
-		now.Nanosecond()/1000000000)
-
-	d, err := time.ParseDuration("5s")
+	msgs, err := rabbitMgr.ConsumeQueue()
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("Fail to Consume Queue...[%v]", err)
 	}
 
-	then := now.Add(d)
-	end := fmt.Sprintf(
-		common.TIME_FMT,
-		then.Year(),
-		then.Month(),
-		then.Day(),
-		then.Hour(),
-		then.Minute(),
-		then.Second(),
-		then.Nanosecond()/1000000000)
+	// make blocking for get rabbitmq msessages
+	forever := make(chan bool)
 
-	tmpUdr.SetUdrRaw(randEui, start, end, randByte, "")
+	// messgae processing main loop
+	go processUdrReq(msgs)
 
-	return tmpUdr
+	log.Info("Waiting for UDR request messages...")
+	<-forever
+}
+
+func processUdrReq(msgs common.QueMsg) {
+	procCh := make(chan bool, 100)
+
+	for d := range msgs {
+		log.Infof("Received a message: %s %v", d.Body, reflect.TypeOf(d.Body))
+
+		reqMsg, err := common.UdrReqMsgParse(d.Body)
+		if err != nil {
+			log.Errorf("Fail to parse UDR request message => %v", err)
+			d.Reject(false)
+			continue
+		}
+
+		var udrFunc func() (udr.UdrRaw, error)
+
+		switch reqMsg.ErrorType {
+		case common.NORMAL:
+			log.Info("Generate Normal UDR...")
+			udrFunc = udr.MakeRandomUdr
+		case common.TIME_ERR:
+			log.Info("Generate Time Error UDR...")
+			udrFunc = udr.MakeTimeErrUdr
+		case common.EUI_ERR:
+			log.Info("Generate EUI Error UDR...")
+			udrFunc = udr.MakeEuiErrUdr
+		case common.FMT_ERR:
+			log.Info("Generate Format Error UDR...")
+			udrFunc = udr.MakeFmtErrUdr
+		}
+
+		go processUdrGen(reqMsg.Count, udrFunc, procCh)
+		go common.ResponseAck(d, procCh)
+	}
+}
+
+func processUdrGen(udrCnt int, procFunc func() (udr.UdrRaw, error), procCh chan bool) {
+	for i := 0; i < udrCnt; i++ {
+		randUdr, err := procFunc()
+		if err != nil {
+			log.Errorf("Fail to make random udr: [%v]", err)
+			procCh <- false
+		}
+
+		fmt.Printf("random UDR %v\n", randUdr)
+
+		jsonUdr, err := randUdr.ConvToJsonStr()
+		if err != nil {
+			log.Errorf("Udr to Json failed: UDR: [%v] JSON: [%v]", randUdr, err)
+			procCh <- false
+		}
+
+		fmt.Printf("random JSON UDR %v\n", jsonUdr)
+
+		err = rabbitMgr.PublishToQueue(jsonUdr)
+		if err != nil {
+			log.Errorf("UDR message is not send: %v", err)
+			procCh <- false
+		}
+
+		procCh <- true
+	}
 }

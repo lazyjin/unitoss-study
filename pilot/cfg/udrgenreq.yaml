@@ -1,0 +1,16 @@
+logdir: /Users/lazyjin/Developer/unitoss-study/pilot/logs
+loglevel: DEBUG
+logname: app_udrgenreq.log
+
+# rabbitmq conifg
+rabbithost: 52.79.49.39
+rabbitport: 5672
+rabbituser: unitoss
+rabbitpw: turtlerate
+
+# queue info
+udrqueue: "udr_task"
+reqreciever: "req_udr_task"
+
+# web info
+templatedir: /Users/lazyjin/Developer/unitoss-study/pilot/src/udrgenreq/templates

@@ -96,6 +96,9 @@
           <li>Please enter an integer value within 1~1000</li>
         </ul>
       </div>
+      <div class="ui success message">
+        <div class="header">UDR Generating Complete</div>
+      </div>
     </form>
   </div>
 </body>
@@ -104,47 +107,38 @@
 $(function() {
   $('#select').dropdown();
 
-  $('.ui.form').form({
+  $.fn.api.settings.api = {
+    'genreq': '/genreq/'
+  };
+
+  var validation = {
     on: 'blur',
-      fields: {
-        errortype: {
-          identifier : 'errortype',
-          rules: [
-            {
-              type : 'empty',
-              prompt : 'Please select a UDR type'
-            }
-          ]
-        },
-        count: {
-          identifier : 'count',
-          rules: [
-            {
-              type : 'integer[1..1000]',
-              prompt : 'Please enter an integer value within 1~1000'
-            }
-          ]
-        }
+    fields: {
+      errortype: {
+        identifier : 'errortype',
+        rules: [
+          {
+            type : 'empty',
+            prompt : 'Please select a UDR type'
+          }
+        ]
+      },
+      count: {
+        identifier : 'count',
+        rules: [
+          {
+            type : 'integer[1..1000]',
+            prompt : 'Please enter an integer value within 1~1000'
+          }
+        ]
       }
-  })
-  // $('#submit').on('click', function() {
-  //   if(validate()) {
-  //     alert("gogogo1")
-  //     var ajaxdata = $("#udrsubmit").serializeArray();
-  //     alert("gogogo2")
-  //     $.makeAjaxApi('/web/account/accountinput', 'html', ajaxdata)
-  //       .send( function(success, data) {
-  //         if(success) {
-  //             if(data == '0') {
-  //                 alert('등록하였습니다.');
-  //                 history.back();
-  //                 return ;
-  //             }
-  //         }
-  //         alert('등록 중 에러가 발생하였습니다.');
-  //       });
-  //   }
-  // });
+    }
+  };
+
+  $('.ui.form').form(validation).api({
+    action: 'genreq',
+    serializeForm: true
+  });
 });
 </script>
 </html>

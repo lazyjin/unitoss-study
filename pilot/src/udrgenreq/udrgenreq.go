@@ -3,16 +3,25 @@ package main
 import (
 	"common"
 	"common/clog"
+	"encoding/json"
 	"errors"
 	"html/template"
 	"net/http"
 	"path"
 	"regexp"
+	"strconv"
 )
 
 type Page struct {
 	Title string
 	Body  []byte
+}
+
+type Response struct {
+	Success string      `json:"success"`
+	Message string      `json:"message"`
+	data    interface{} `json:"data"`
+	Error   error       `json:error`
 }
 
 const PNAME = "udrgenreq"
@@ -23,7 +32,7 @@ var (
 )
 
 var templates *template.Template //= template.Must(template.ParseFiles("/Users/lazyjin/Developer/unitoss-study/pilot/src/udrgenreq/udrgen.html", "/Users/lazyjin/Developer/unitoss-study/pilot/src/udrgenreq/view.html"))
-var validPath = regexp.MustCompile("^/(udrgen)/$")
+var validPath = regexp.MustCompile("^/(udrgen|genreq)/$")
 
 func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
 	m := validPath.FindStringSubmatch(r.URL.Path)
@@ -35,18 +44,42 @@ func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
 }
 
 func udrGenHandler(w http.ResponseWriter, r *http.Request) {
-	errortype := r.FormValue("errortype")
-	count := r.FormValue("count")
-	log.Debugf("%v, %v", errortype, count)
-
 	renderTemplate(w, "udrgen")
 }
 
+func genReqHandler(w http.ResponseWriter, r *http.Request) {
+	errortype, _ := strconv.Atoi(r.FormValue("errortype"))
+	count, _ := strconv.Atoi(r.FormValue("count"))
+	log.Debugf("%v, %v", errortype, count)
+
+	suc := "true"
+
+	msg := common.UdrReqMsg{
+		ErrorType: errortype,
+		Count:     count,
+	}
+	jsonMsg, err := json.Marshal(msg)
+	if err != nil {
+		suc = "false"
+		log.Errorf("Fail to Marshal msg : %v", err)
+	}
+
+	err = rabbitMgr.PublishToQueue(string(jsonMsg))
+	if err != nil {
+		suc = "false"
+		log.Errorf("Publish queue fail: %v", err)
+	}
+
+	json.NewEncoder(w).Encode(Response{
+		Success: suc,
+		Message: "good",
+		Error:   err,
+	})
+
+	return
+}
+
 func renderTemplate(w http.ResponseWriter, tmpl string) {
-	// err := templates.ExecuteTemplate(w, "header", nil)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// }
 	err := templates.ExecuteTemplate(w, tmpl, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -71,6 +104,7 @@ func main() {
 	log.Info("Start UDR generating Request Web Server...")
 
 	http.HandleFunc("/udrgen/", makeHandler(udrGenHandler))
+	http.HandleFunc("/genreq/", makeHandler(genReqHandler))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 

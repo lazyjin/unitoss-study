@@ -4,8 +4,8 @@ import (
 	"common"
 	"common/clog"
 	"flag"
-	"fmt"
 	"reflect"
+	"time"
 	"udr"
 )
 
@@ -31,10 +31,9 @@ func main() {
 		runDaemon()
 
 	} else {
-		procCh := make(chan bool, 100)
+		procCh := make(chan bool)
 		processUdrGen(1, udr.MakeRandomUdr, procCh)
 		<-procCh
-
 	}
 }
 
@@ -59,8 +58,6 @@ func setRecvQueue() {
 }
 
 func runDaemon() {
-	fmt.Println("run daemon mode")
-
 	msgs, err := rabbitMgr.ConsumeQueue()
 	if err != nil {
 		log.Panicf("Fail to Consume Queue...[%v]", err)
@@ -77,7 +74,7 @@ func runDaemon() {
 }
 
 func processUdrReq(msgs common.QueMsg) {
-	procCh := make(chan bool, 100)
+	procCh := make(chan bool)
 
 	for d := range msgs {
 		log.Infof("Received a message: %s %v", d.Body, reflect.TypeOf(d.Body))
@@ -112,29 +109,35 @@ func processUdrReq(msgs common.QueMsg) {
 }
 
 func processUdrGen(udrCnt int, procFunc func() (udr.UdrRaw, error), procCh chan bool) {
+	start := time.Now()
+
 	for i := 0; i < udrCnt; i++ {
 		randUdr, err := procFunc()
 		if err != nil {
 			log.Errorf("Fail to make random udr: [%v]", err)
 			procCh <- false
+			break
 		}
-
-		fmt.Printf("random UDR %v\n", randUdr)
 
 		jsonUdr, err := randUdr.ConvToJsonStr()
 		if err != nil {
 			log.Errorf("Udr to Json failed: UDR: [%v] JSON: [%v]", randUdr, err)
 			procCh <- false
+			break
 		}
 
-		fmt.Printf("random JSON UDR %v\n", jsonUdr)
+		log.Debugf("random JSON UDR %v\n", jsonUdr)
 
 		err = rabbitMgr.PublishToQueue(jsonUdr)
 		if err != nil {
 			log.Errorf("UDR message is not send: %v", err)
 			procCh <- false
+			break
 		}
-
-		procCh <- true
 	}
+
+	procCh <- true
+
+	elapsed := time.Since(start)
+	log.Infof("Generate %d UDR takes %s...", udrCnt, elapsed)
 }

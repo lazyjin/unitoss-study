@@ -3,18 +3,20 @@ package main
 import (
 	"common"
 	"common/clog"
+	"common/rabbit"
+	"common/redismgr"
+	"common/udr"
 	"flag"
 	"reflect"
 	"time"
-	"udr"
 )
 
 const PNAME = "cdrgen"
 
 var (
 	log       = clog.GetLogger()
-	rabbitMgr = common.NewRabbitManager()
-	redis     = common.GetRedisCluster()
+	rabbitMgr = rabbit.NewRabbitManager()
+	redis     = redismgr.GetRedisCluster()
 )
 
 func main() {
@@ -54,7 +56,7 @@ func init() {
 	rabbitMgr.UdrSendQueueDeclare(conf.Udrqueue)
 
 	// redis cluster connect
-	common.ConnectRedisCluster(conf.Redisclusters)
+	redismgr.ConnectRedisCluster(conf.Redisclusters)
 }
 
 func setRecvQueue() {
@@ -78,7 +80,7 @@ func runDaemon() {
 	<-forever
 }
 
-func processUdrReq(msgs common.QueMsg) {
+func processUdrReq(msgs rabbit.QueMsg) {
 	procCh := make(chan bool)
 
 	for d := range msgs {
@@ -109,7 +111,7 @@ func processUdrReq(msgs common.QueMsg) {
 		}
 
 		go processUdrGen(reqMsg.Count, udrFunc, procCh)
-		go common.ResponseAck(d, procCh)
+		go rabbit.ResponseAck(d, procCh)
 	}
 }
 

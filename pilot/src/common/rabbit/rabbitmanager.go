@@ -1,6 +1,7 @@
-package common
+package rabbit
 
 import (
+	"common/clog"
 	"github.com/streadway/amqp"
 	"strconv"
 )
@@ -30,6 +31,8 @@ type RabbitMgr interface {
 }
 
 var _ RabbitMgr = &Rabbit{}
+
+var log = clog.GetLogger()
 
 func NewRabbitManager() RabbitMgr {
 	rmgr := &Rabbit{}

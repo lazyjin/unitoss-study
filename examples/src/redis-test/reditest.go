@@ -16,12 +16,12 @@ func main() {
 
 	cluster, err := redis.NewCluster(
 		&redis.Options{
-			StartNodes:   []string{"127.0.0.1:7000", "127.0.0.1:7001", "127.0.0.1:7002", "127.0.0.1:7003", "127.0.0.1:7004", "127.0.0.1:7005"},
-			ConnTimeout:  50 * time.Millisecond,
-			ReadTimeout:  50 * time.Millisecond,
-			WriteTimeout: 50 * time.Millisecond,
+			StartNodes:   []string{"52.79.49.39:7000", "52.79.49.39:7001", "52.79.49.39:7002", "52.79.49.39:7003", "52.79.49.39:7004", "52.79.49.39:7005"},
+			ConnTimeout:  500 * time.Millisecond,
+			ReadTimeout:  500 * time.Millisecond,
+			WriteTimeout: 500 * time.Millisecond,
 			KeepAlive:    16,
-			AliveTime:    60 * time.Second,
+			AliveTime:    600 * time.Second,
 		})
 
 	if err != nil {

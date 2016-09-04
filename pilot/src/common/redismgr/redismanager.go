@@ -1,10 +1,13 @@
-package common
+package redismgr
 
 import (
+	"common/clog"
 	"gopkg.in/redis.v4"
 )
 
 var RedisClust *redis.ClusterClient
+
+var log = clog.GetLogger()
 
 func GetRedisCluster() *redis.ClusterClient {
 	return RedisClust

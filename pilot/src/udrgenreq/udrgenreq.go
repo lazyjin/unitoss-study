@@ -50,7 +50,6 @@ func udrGenHandler(w http.ResponseWriter, r *http.Request) {
 func genReqHandler(w http.ResponseWriter, r *http.Request) {
 	errortype, _ := strconv.Atoi(r.FormValue("errortype"))
 	count, _ := strconv.Atoi(r.FormValue("count"))
-	log.Debugf("%v, %v", errortype, count)
 
 	suc := "true"
 
@@ -58,6 +57,7 @@ func genReqHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorType: errortype,
 		Count:     count,
 	}
+
 	jsonMsg, err := json.Marshal(msg)
 	if err != nil {
 		suc = "false"
@@ -76,6 +76,8 @@ func genReqHandler(w http.ResponseWriter, r *http.Request) {
 		Error:   err,
 	})
 
+	log.Infof("Generating %v UDR Type of %v complete...", count, errortype)
+
 	return
 }
 
@@ -90,7 +92,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string) {
 func makeHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		m := validPath.FindStringSubmatch(r.URL.Path)
-		log.Debugf("m is %v", m)
+
 		if m == nil {
 			http.NotFound(w, r)
 			return

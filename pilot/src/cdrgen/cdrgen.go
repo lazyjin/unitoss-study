@@ -14,6 +14,7 @@ const PNAME = "cdrgen"
 var (
 	log       = clog.GetLogger()
 	rabbitMgr = common.NewRabbitManager()
+	redis     = common.GetRedisCluster()
 )
 
 func main() {
@@ -42,6 +43,7 @@ func init() {
 	conf := common.GetConfig()
 	// init log
 	clog.InitWith(PNAME, conf.Logname, conf.Logdir, conf.Loglevel)
+	log.Info("CDRGEN Initializing...")
 
 	// rabbit publisher connect
 	rabbitMgr.ConnectRabbit(
@@ -50,6 +52,9 @@ func init() {
 		conf.Rabbituser,
 		conf.Rabbitpw)
 	rabbitMgr.UdrSendQueueDeclare(conf.Udrqueue)
+
+	// redis cluster connect
+	common.ConnectRedisCluster(conf.Redisclusters)
 }
 
 func setRecvQueue() {

@@ -22,6 +22,9 @@ type Config struct {
 	Udrqueue    string
 	Reqreciever string
 
+	// redis config
+	Redisclusters []string
+
 	// web template
 	Templatedir string
 }
